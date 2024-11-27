@@ -36,10 +36,10 @@ def score_text(text):
             score += ENGLISH_FREQ[char]
     return score
 
-def s1_ch3():
-    print(f"s1_ch3")
+def s1_ch3(hex_string):
+    # print(f"s1_ch3")
 
-    unencoded = bytes.fromhex("1b37373331363f78151b7f2b783431333d78397828372d363c78373e783a393b3736")
+    unencoded = bytes.fromhex(hex_string)
 
     best_score = -1
     best_decrypted_text = ''
@@ -60,18 +60,25 @@ def s1_ch3():
             best_key = key
             best_decrypted_text = decrypted
 
-    print(f"Key Character: {best_key}")
-    print(f"Decrypted text: {best_decrypted_text}")
-    print(f"Score: {best_score}")
+    return best_score, best_key, best_decrypted_text
+    # print(f"Key: {best_key}. Text: {best_decrypted_text}. Score: {round(best_score), 2}")
 
 # --------- s1_ch4 ---------
 def s1_ch4():
     print(f"s1_ch4")
 
+    with open("ch4_text.txt", "r") as file:
+        for line in file:
+            best_score, best_key, best_decrypted_text = s1_ch3(line)
+
+            if best_decrypted_text[0:3] == "nOW":
+                print(f"Line: {line}") # Answer: 7b5a4215415d544115415d5015455447414c155c46155f4058455c5b523f
+                print(f"Key: {best_key}. Text: {best_decrypted_text}. Score: {round(best_score), 2}")
 
 # --------- s1_ch5 ---------
 def s1_ch5():
     print(f"s1_ch5")
+    
 
 
 # --------- s1_ch6 ---------
@@ -95,9 +102,9 @@ if __name__ == "__main__":
     # hexTobase64("49276d206b696c6c696e6720796f757220627261696e206c696b65206120706f69736f6e6f7573206d757368726f6f6d")
 
     # s1_ch2("1c0111001f010100061a024b53535009181c", "686974207468652062756c6c277320657965")
-    # s1_ch3()
-    s1_ch4()
-    # s1_ch5()
+    # s1_ch3("1b37373331363f78151b7f2b783431333d78397828372d363c78373e783a393b3736")
+    # s1_ch4()
+    s1_ch5()
     # s1_ch6()
     # s1_ch7()
     # s1_ch8()
