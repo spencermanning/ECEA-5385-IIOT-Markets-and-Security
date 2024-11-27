@@ -1,6 +1,7 @@
 # Set 1
 
 import base64
+from itertools import cycle # for challenge 5
 
 # --------- s1_ch1 ---------
 def hexTobase64(hex):
@@ -78,8 +79,21 @@ def s1_ch4():
 # --------- s1_ch5 ---------
 def s1_ch5():
     print(f"s1_ch5")
-    
 
+    stanza = '''Burning 'em, if you ain't quick and nimble
+I go crazy when I hear a cymbal'''
+
+    # for key in "ICE".encode():
+    #     for byte in stanza.encode():
+    #         print(byte ^ key)
+
+    comb = ''
+    for key, byte in zip(cycle("ICE".encode()), stanza.encode()):
+        comb += format(key ^ byte, '02x')
+
+    # This should be two lines to be the full correct answer.
+    # Answer: 0b3637272a2b2e63622c2e69692a23693a2a3c6324202d623d63343c2a26226324272765272a282b2f20430a652e2c652a3124333a653e2b2027630c692b20283165286326302e27282f
+    print(comb)
 
 # --------- s1_ch6 ---------
 def s1_ch6():
