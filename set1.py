@@ -96,9 +96,66 @@ I go crazy when I hear a cymbal'''
     print(comb)
 
 # --------- s1_ch6 ---------
+def ham(str1, str2):
+    str1 = ''.join(format(byte, '08b') for byte in str1.encode('utf-8'))
+    str2 = ''.join(format(byte, '08b') for byte in str2.encode('utf-8'))
+
+    ham = 0
+    for b1, b2 in zip(str1, str2):
+        if b1 != b2:
+            ham += 1
+    # print(ham)
+    return ham
+
 def s1_ch6():
     print(f"s1_ch6")
+    # ham("this is a test", "wokka wokka!!!")
 
+    with open("ch6_text.txt", "r") as orig_file:
+        b64_data = orig_file.read()
+        decoded_b64 = base64.b64decode(b64_data)
+
+        # 3. For each KEYSIZE, take the first KEYSIZE worth of bytes, and the second KEYSIZE worth of bytes, 
+        # and find the edit distance between them. Normalize this result by dividing by KEYSIZE.
+        norm_ham_list = []
+        for KEYSIZE in range (2, 40):
+            bytes1 = decoded_b64[:KEYSIZE]
+            bytes2 = decoded_b64[KEYSIZE:2*KEYSIZE]
+
+            ham_out = ham(str(bytes1), str(bytes2))
+            norm_ham = ham_out/KEYSIZE
+
+            norm_ham_list.append(norm_ham)
+
+        # 4. The KEYSIZE with the smallest normalized edit distance is probably the key. 
+        # You could proceed perhaps with the smallest 2-3 KEYSIZE values. 
+        # Or take 4 KEYSIZE blocks instead of 2 and average the distances.
+        smallest_keysize_idx = norm_ham_list.index(min(norm_ham_list))
+        smallest_keysize = smallest_keysize_idx+2 # we started testing with 2 KEYSIZE
+        print(f"Smallest keysize: {smallest_keysize}")
+
+        # 5. Now that you probably know the KEYSIZE: break the ciphertext into blocks of KEYSIZE length.
+        groups = [b64_data[i:i+smallest_keysize] for i in range(0, len(b64_data), smallest_keysize)]
+
+        #6. Now transpose the blocks: make a block that is the first byte of every block, 
+        # and a block that is the second byte of every block, and so on.
+        # FIXME: Make automatic for different keysizes
+        trans_groups = ["", ""]
+        group1 = [grp[0] for grp in groups]
+        group2 = [grp[1] if len(grp) > smallest_keysize-1 else '' for grp in groups]
+
+        group1_decoded = b''.join(base64.b64decode(char) for char in group1)
+        group2_decoded = b''.join(base64.b64decode(char) for char in group1)
+
+        group1_hex = group1_decoded.hex()
+        group2_hex = group2_decoded.hex()
+
+        #7. Solve each block as if it was single-character XOR. You already have code to do this.
+        best_score, best_key, best_decrypted_text = s1_ch3(group1_str)
+        # best_score, best_key, best_decrypted_text = s1_ch3(test2)
+        print(f"Key: {best_key}. Text: {best_decrypted_text}. Score: {round(best_score), 2}")
+
+    print("Done")
 
 # --------- s1_ch7 ---------
 def s1_ch7():
@@ -118,8 +175,8 @@ if __name__ == "__main__":
     # s1_ch2("1c0111001f010100061a024b53535009181c", "686974207468652062756c6c277320657965")
     # s1_ch3("1b37373331363f78151b7f2b783431333d78397828372d363c78373e783a393b3736")
     # s1_ch4()
-    s1_ch5()
-    # s1_ch6()
+    # s1_ch5()
+    s1_ch6()
     # s1_ch7()
     # s1_ch8()
 
