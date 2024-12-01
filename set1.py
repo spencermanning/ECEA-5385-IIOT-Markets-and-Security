@@ -2,6 +2,7 @@
 
 import base64
 from itertools import cycle # for challenge 5
+from Crypto.Cipher import AES # for challenge 7
 
 # --------- s1_ch1 ---------
 def hexTobase64(hex):
@@ -144,14 +145,25 @@ def s1_ch6():
         group1 = [grp[0] for grp in groups]
         group2 = [grp[1] if len(grp) > smallest_keysize-1 else '' for grp in groups]
 
-        group1_decoded = b''.join(base64.b64decode(char) for char in group1)
-        group2_decoded = b''.join(base64.b64decode(char) for char in group1)
+        #7. Solve each block as if it was single-character XOR. You already have code to do this.
+        group1_comb = ''.join(group1)
+        group2_comb = ''.join(group2)
+        # group1_comb = group1_comb.replace("\n", "")
+        # group2_comb = group2_comb.replace("\n", "")
+        group1_comb += '=' * ((4 - len(group1_comb) % 4) % 4) # pad with equal signs to be a multiple of 4 bytes long
+        group2_comb += '=' * ((4 - len(group2_comb) % 4) % 4) # pad with equal signs to be a multiple of 4 bytes long
+        # test1 = "HITsA9E4GlHkD4AsTsFUA4SQV0QNTVgHBNUHATjMgJgRxMRHwFUZQJGm1AxGDoQ0UQXAEoR8ShTUFkRYCpB8WhaID0QIlawdnEgJgRl60ADAhJkFAdVEgSQLQMAwXNFYCdCdFZeMCsB9B8ThSdBcRhEAyUHLRJgOlAjpRJgUAL0CFBhVQHhPG5MkUoCQBlTIUgEYS8E8ApRsSQTQEMwWXMkPgD1MUAwJQOwVBPhFiLRBgKV4T9BERMDAFoHwQ5LFI4SRQIB9K4C8GFjExMhcgHxUhJQZCFwDVHU4AKRJl3wmHdEAANT5FQC5HYG9dBAsH4VUD5TgRkm6UTgA1GlKxTUsAAwXwSQLQb09iWgcAcStTsAYCVCIGgRgaUScAkR8AkDUF1gRxJlJwJQAURAWRKgSAOBLlw1ixOEUYRC8UYCICAE8RxRBHYTQClBARpU0DhXzFH1bkNDAUbRFwXRPlY02wuxakUAAZYVZCQSMVcQwU1BsAAAACgRQERGkAdBqRJ0DQFhBlMEHUPxP0zwrkdFaEHQNU9SBW4G9DhT0A4TQC0T4CBesHEA1eZRFiAAOUCFXBfBOAdUxVxm9lRgBgPQzD4GoFoUFTsB0TERoSRBpFsCITNPpKMhPUGQPxRG7QP1b09kiAX0dgAwNw1hNAsVgVYKgTNT0AADQCpXBPAH1e5YYA5QFjHAAxSwORB02Qiwb0VkUBJw0RDkrNoAFVUB4RERQFAQQH0CVAsK5LdZhEpQLRTReRcBb09kjQd1RgFRJShVDhBQSWdBAS9TsAUQlb0BoAECYNVKcCsGdUIhJAdRHBDk3krAdynwOkEy8RUSOESDXRADdA0EAHYBYC0DVZFO1JYBdHwA9GMwTSBBPU40mhPgdEAG/j6SMwNASTfDXGJWESASRBsGNTkHYNNJITVHYAQBcLwBHxPU403hakTRAgCk1QEwBjdCPiBRTTREIBcRUF0BMTFNoIABkVIQAB8dwCklc000lgAwNxAgGwxRfEDRbnamxBUVfDlGERIFwHEHcMVKsSdHMA0CkdIGxakE2QjAOFbxJEJxtBKROBbjaSdwHjEQaBsEMUkCEBdLUJAAFG9VYGMMcToDNe4Q7RJUUQBANwtQFE3TSDJycWtwNVHUTFtGwCEBlesBcAZVYWdYANcAwQYUQXAxLAcRUwOwmgDUrAXjd2ckThYUAEc3IGMQES8M9NICNHZAoH1XYDsAkBkFAVR0awOUdg8VBAEASjUTbktRdVchDDFwJA8CJN4CIBhEAAoCdXwGkCMBAWYUARo0TgZw7hNAFAXjaSSASlNFOULHMEE0AB9epLdTARgU4EMMQQla0BcXAFgA4BIAa00DMQPE7DbmGALBcS3BBTKhOUTgUMQYoGsBdA0SpNQToBgUkGoHkC5HVC8g0BJQOkGDfDTUtzJFLxbHJxARURM1HYYT5MReESAOUDUQkUQXBKYQISVGwGtRNwVEB3JCCQGxIEKwdSX0jgAwIRXwKBdGsTxSoMlCZFwUQVMU0RMGAZwUYCdBBwdzaSWQIlcULxCDX0jwBwBlBhIhMEgR5RMOwBQTQHkUUFlbkHVBAF0RYCpUFSayTkHhRQXBUzFgIkDROxqRJQNUKTJDUJwA0QUFAU4U0DNGpC9eYHJR4G4CSTSxJwIFdgTjckOUDxURCQFgPBNRKSELUAlEgCAUEU8CsShHYUIRUAoV0WQySgOBI0X0UnvgQgbBAVEhGQJUEgPRELUBgQIHsG0AARQBkFAUEAxYQG4AxQZxJwIFdgTjI0GEUBNRPFJgUAAAKAFjeDBFwBAT4CkEMCVBYFUCtEEVwWhV5G8BcS+wKSNxJBaAAUTxJ0MRRAPRQAAQBFRIwQAGgRYB5TIAwSIAcE8TEY0D4ThkDkc3FQE0bVqFB1dgUAQgWRQwRW"
+        # test = base64.b64decode(test1)
 
+        # --------------------------
+        # FIXME: WHY IS group1_comb length wrong for the b64 decode? Should I restructure how I break the code apart above?
+        group1_decoded = base64.b64decode(group1_comb)
+        group2_decoded = base64.b64decode(group2_comb)
         group1_hex = group1_decoded.hex()
         group2_hex = group2_decoded.hex()
+        best_score, best_key, best_decrypted_text = s1_ch3(group1_hex)
+        best_score, best_key, best_decrypted_text = s1_ch3(group2_hex)
 
-        #7. Solve each block as if it was single-character XOR. You already have code to do this.
-        best_score, best_key, best_decrypted_text = s1_ch3(group1_str)
         # best_score, best_key, best_decrypted_text = s1_ch3(test2)
         print(f"Key: {best_key}. Text: {best_decrypted_text}. Score: {round(best_score), 2}")
 
@@ -160,7 +172,7 @@ def s1_ch6():
 # --------- s1_ch7 ---------
 def s1_ch7():
     print(f"s1_ch7")
-
+    
 
 # --------- s1_ch8 ---------
 def s1_ch8():
@@ -176,8 +188,8 @@ if __name__ == "__main__":
     # s1_ch3("1b37373331363f78151b7f2b783431333d78397828372d363c78373e783a393b3736")
     # s1_ch4()
     # s1_ch5()
-    s1_ch6()
-    # s1_ch7()
+    # s1_ch6()
+    s1_ch7()
     # s1_ch8()
 
     print("\n------------------ End: ------------------")
