@@ -1,8 +1,9 @@
-# Set 1
+# Set 1 and 2
 
 import base64
 from itertools import cycle # for challenge 5
 from Crypto.Cipher import AES # for challenge 7
+from Crypto.Util.Padding import pad, unpad  # for challenge 9
 
 # --------- s1_ch1 ---------
 def hexTobase64(hex):
@@ -196,6 +197,44 @@ def s1_ch8():
         # There is only one line that has been encrypted with ECB. Index 132.
         print(ecb_suspects)
 
+# --------- s1_ch9 ---------
+def pad_msg(byte_text):
+    return pad(byte_text, 20)
+
+def s2_ch9(byte_text):
+    print(f"s2_ch9")
+    print(pad_msg(byte_text))
+
+# --------- s1_ch10 ---------
+def s2_ch10():
+    print(f"s2_ch10")
+    IV = "ABCDEFGHIJKLMNOP"
+
+    
+# --------- s1_ch11 ---------
+def s2_c11():
+    print(f"s2_ch11")
+
+# --------- s1_ch12 ---------
+def s2_ch12():
+    print(f"s2_ch12")
+
+# --------- s1_ch13 ---------
+def s2_ch13():
+    print(f"s2_ch13")
+
+# --------- s1_ch14 ---------
+def s2_ch14():
+    print(f"s2_ch14")
+
+# --------- s1_ch15 ---------
+def s2_ch15():
+    print(f"s2_ch15")
+
+# --------- s1_ch16 ---------
+def s2_ch16():
+    print(f"s2_ch16")
+
 
 if __name__ == "__main__":
     print("\n------------------ Start: ------------------")
@@ -209,7 +248,15 @@ if __name__ == "__main__":
     # s1_ch5()
     # s1_ch6()
     # s1_ch7()
-    s1_ch8()
+    # s1_ch8()
+    # s2_ch9(b"YELLOW SUBMARINE")
+    s2_ch10()
+    # s2_ch11()
+    # s2_ch12()
+    # s2_ch13()
+    # s2_ch14()
+    # s2_ch15()
+    # s2_ch16()
 
     print("\n------------------ End: ------------------")
 
