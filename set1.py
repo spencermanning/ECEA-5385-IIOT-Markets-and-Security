@@ -114,14 +114,14 @@ def s1_ch6():
 
     with open("ch6_text.txt", "r") as orig_file:
         b64_data = orig_file.read()
-        decoded_b64 = base64.b64decode(b64_data)
+        b64_decoded = base64.b64decode(b64_data)
 
         # 3. For each KEYSIZE, take the first KEYSIZE worth of bytes, and the second KEYSIZE worth of bytes, 
         # and find the edit distance between them. Normalize this result by dividing by KEYSIZE.
         norm_ham_list = []
         for KEYSIZE in range (2, 40):
-            bytes1 = decoded_b64[:KEYSIZE]
-            bytes2 = decoded_b64[KEYSIZE:2*KEYSIZE]
+            bytes1 = b64_decoded[:KEYSIZE]
+            bytes2 = b64_decoded[KEYSIZE:2*KEYSIZE]
 
             ham_out = ham(str(bytes1), str(bytes2))
             norm_ham = ham_out/KEYSIZE
@@ -136,7 +136,7 @@ def s1_ch6():
         print(f"Smallest keysize: {smallest_keysize}")
 
         # 5. Now that you probably know the KEYSIZE: break the ciphertext into blocks of KEYSIZE length.
-        groups = [b64_data[i:i+smallest_keysize] for i in range(0, len(b64_data), smallest_keysize)]
+        groups = [b64_decoded[i:i+smallest_keysize] for i in range(0, len(b64_decoded), smallest_keysize)]
 
         #6. Now transpose the blocks: make a block that is the first byte of every block, 
         # and a block that is the second byte of every block, and so on.
@@ -146,25 +146,14 @@ def s1_ch6():
         group2 = [grp[1] if len(grp) > smallest_keysize-1 else '' for grp in groups]
 
         #7. Solve each block as if it was single-character XOR. You already have code to do this.
-        group1_comb = ''.join(group1)
-        group2_comb = ''.join(group2)
-        # group1_comb = group1_comb.replace("\n", "")
-        # group2_comb = group2_comb.replace("\n", "")
-        group1_comb += '=' * ((4 - len(group1_comb) % 4) % 4) # pad with equal signs to be a multiple of 4 bytes long
-        group2_comb += '=' * ((4 - len(group2_comb) % 4) % 4) # pad with equal signs to be a multiple of 4 bytes long
-        # test1 = "HITsA9E4GlHkD4AsTsFUA4SQV0QNTVgHBNUHATjMgJgRxMRHwFUZQJGm1AxGDoQ0UQXAEoR8ShTUFkRYCpB8WhaID0QIlawdnEgJgRl60ADAhJkFAdVEgSQLQMAwXNFYCdCdFZeMCsB9B8ThSdBcRhEAyUHLRJgOlAjpRJgUAL0CFBhVQHhPG5MkUoCQBlTIUgEYS8E8ApRsSQTQEMwWXMkPgD1MUAwJQOwVBPhFiLRBgKV4T9BERMDAFoHwQ5LFI4SRQIB9K4C8GFjExMhcgHxUhJQZCFwDVHU4AKRJl3wmHdEAANT5FQC5HYG9dBAsH4VUD5TgRkm6UTgA1GlKxTUsAAwXwSQLQb09iWgcAcStTsAYCVCIGgRgaUScAkR8AkDUF1gRxJlJwJQAURAWRKgSAOBLlw1ixOEUYRC8UYCICAE8RxRBHYTQClBARpU0DhXzFH1bkNDAUbRFwXRPlY02wuxakUAAZYVZCQSMVcQwU1BsAAAACgRQERGkAdBqRJ0DQFhBlMEHUPxP0zwrkdFaEHQNU9SBW4G9DhT0A4TQC0T4CBesHEA1eZRFiAAOUCFXBfBOAdUxVxm9lRgBgPQzD4GoFoUFTsB0TERoSRBpFsCITNPpKMhPUGQPxRG7QP1b09kiAX0dgAwNw1hNAsVgVYKgTNT0AADQCpXBPAH1e5YYA5QFjHAAxSwORB02Qiwb0VkUBJw0RDkrNoAFVUB4RERQFAQQH0CVAsK5LdZhEpQLRTReRcBb09kjQd1RgFRJShVDhBQSWdBAS9TsAUQlb0BoAECYNVKcCsGdUIhJAdRHBDk3krAdynwOkEy8RUSOESDXRADdA0EAHYBYC0DVZFO1JYBdHwA9GMwTSBBPU40mhPgdEAG/j6SMwNASTfDXGJWESASRBsGNTkHYNNJITVHYAQBcLwBHxPU403hakTRAgCk1QEwBjdCPiBRTTREIBcRUF0BMTFNoIABkVIQAB8dwCklc000lgAwNxAgGwxRfEDRbnamxBUVfDlGERIFwHEHcMVKsSdHMA0CkdIGxakE2QjAOFbxJEJxtBKROBbjaSdwHjEQaBsEMUkCEBdLUJAAFG9VYGMMcToDNe4Q7RJUUQBANwtQFE3TSDJycWtwNVHUTFtGwCEBlesBcAZVYWdYANcAwQYUQXAxLAcRUwOwmgDUrAXjd2ckThYUAEc3IGMQES8M9NICNHZAoH1XYDsAkBkFAVR0awOUdg8VBAEASjUTbktRdVchDDFwJA8CJN4CIBhEAAoCdXwGkCMBAWYUARo0TgZw7hNAFAXjaSSASlNFOULHMEE0AB9epLdTARgU4EMMQQla0BcXAFgA4BIAa00DMQPE7DbmGALBcS3BBTKhOUTgUMQYoGsBdA0SpNQToBgUkGoHkC5HVC8g0BJQOkGDfDTUtzJFLxbHJxARURM1HYYT5MReESAOUDUQkUQXBKYQISVGwGtRNwVEB3JCCQGxIEKwdSX0jgAwIRXwKBdGsTxSoMlCZFwUQVMU0RMGAZwUYCdBBwdzaSWQIlcULxCDX0jwBwBlBhIhMEgR5RMOwBQTQHkUUFlbkHVBAF0RYCpUFSayTkHhRQXBUzFgIkDROxqRJQNUKTJDUJwA0QUFAU4U0DNGpC9eYHJR4G4CSTSxJwIFdgTjckOUDxURCQFgPBNRKSELUAlEgCAUEU8CsShHYUIRUAoV0WQySgOBI0X0UnvgQgbBAVEhGQJUEgPRELUBgQIHsG0AARQBkFAUEAxYQG4AxQZxJwIFdgTjI0GEUBNRPFJgUAAAKAFjeDBFwBAT4CkEMCVBYFUCtEEVwWhV5G8BcS+wKSNxJBaAAUTxJ0MRRAPRQAAQBFRIwQAGgRYB5TIAwSIAcE8TEY0D4ThkDkc3FQE0bVqFB1dgUAQgWRQwRW"
-        # test = base64.b64decode(test1)
-
-        # --------------------------
-        # FIXME: WHY IS group1_comb length wrong for the b64 decode? Should I restructure how I break the code apart above?
-        group1_decoded = base64.b64decode(group1_comb)
-        group2_decoded = base64.b64decode(group2_comb)
-        group1_hex = group1_decoded.hex()
-        group2_hex = group2_decoded.hex()
+        group1_hex = ''.join(f"{x:02x}" for x in group1)
+        group2_hex = ''.join(f"{x:02x}" for x in group2)
         best_score, best_key, best_decrypted_text = s1_ch3(group1_hex)
         best_score, best_key, best_decrypted_text = s1_ch3(group2_hex)
 
         # best_score, best_key, best_decrypted_text = s1_ch3(test2)
+        # 8. For each block, the single-byte XOR key that produces the best looking histogram 
+        # is the repeating-key XOR key byte for that block. Put them together and you have the key.
         print(f"Key: {best_key}. Text: {best_decrypted_text}. Score: {round(best_score), 2}")
 
     print("Done")
