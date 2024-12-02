@@ -161,11 +161,22 @@ def s1_ch6():
 # --------- s1_ch7 ---------
 def s1_ch7():
     print(f"s1_ch7")
-    
+    key = b"YELLOW SUBMARINE"
+    with open("ch7_text.txt", "r") as orig_file:
+        b64_coded_data = orig_file.read()
+        ciphertext = base64.b64decode(b64_coded_data)
+
+        # Make the AES cipher from the given key
+        cipher = AES.new(key, AES.MODE_ECB)
+        
+        plaintext = cipher.decrypt(ciphertext)
+
+        print(plaintext.decode("utf-8", errors="ignore"))
 
 # --------- s1_ch8 ---------
 def s1_ch8():
     print(f"s1_ch8")
+    
 
 if __name__ == "__main__":
     print("\n------------------ Start: ------------------")
@@ -178,8 +189,8 @@ if __name__ == "__main__":
     # s1_ch4()
     # s1_ch5()
     # s1_ch6()
-    s1_ch7()
-    # s1_ch8()
+    # s1_ch7()
+    s1_ch8()
 
     print("\n------------------ End: ------------------")
 
