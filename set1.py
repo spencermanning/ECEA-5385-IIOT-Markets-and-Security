@@ -176,7 +176,26 @@ def s1_ch7():
 # --------- s1_ch8 ---------
 def s1_ch8():
     print(f"s1_ch8")
-    
+    with open("ch8_text.txt", "r") as file:
+        ciphertexts = file.readlines()
+
+        ecb_suspects = []
+
+        for idx, line in enumerate(ciphertexts):
+            line = line.strip()
+            cipher_line_bytes = bytes.fromhex(line)
+            chunks = [cipher_line_bytes[i:i+16] for i in range(0, len(cipher_line_bytes), 16)]
+            # set() removes duplicates. So if a line had any duplicates, the comparison with len(chunks) woud be different.
+            num_repeats = len(chunks) - len(set(chunks))
+
+            if num_repeats > 0:
+                ecb_suspects.append((idx, num_repeats, line))
+
+        ecb_suspects.sort(key=lambda x:x[1], reverse=True)
+
+        # There is only one line that has been encrypted with ECB. Index 132.
+        print(ecb_suspects)
+
 
 if __name__ == "__main__":
     print("\n------------------ Start: ------------------")
