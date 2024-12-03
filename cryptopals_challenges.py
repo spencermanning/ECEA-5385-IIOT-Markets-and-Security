@@ -163,6 +163,8 @@ def s1_ch6():
 def ecb_decrypt(ciphertext, key):
     # Make the AES cipher from the given key
     cipher = AES.new(key, AES.MODE_ECB)
+    if len(ciphertext) != 16:
+        ciphertext = pad_msg(ciphertext, 16)
     plaintext = cipher.decrypt(ciphertext)
     return plaintext
 
@@ -201,43 +203,70 @@ def s1_ch8():
         print(ecb_suspects)
 
 # --------- s1_ch9 ---------
-def pad_msg(byte_text):
-    return pad(byte_text, 20)
+def pad_msg(byte_text, length):
+    return pad(byte_text, length)
 
 def s2_ch9(byte_text):
     print(f"s2_ch9")
-    print(pad_msg(byte_text))
+    print(pad_msg(byte_text, 20))
 
 # --------- s1_ch10 ---------
 def ecb_encrypt(plaintext, key):
     # Make the AES cipher from the given key
     cipher = AES.new(key, AES.MODE_ECB)
-    ciphertext = cipher.encrypt(plaintext)
-    return ciphertext
+    if len(plaintext) != 16:
+        plaintext = pad_msg(plaintext, 16)
+    ciphertext_bytes = cipher.encrypt(plaintext)
+    return ciphertext_bytes
 
 def xor_strings(str1, str2):
-    return bytes(b1 ^ b2 for b1, b2 in zip(bytes.fromhex(str1), bytes.fromhex(str2)))
+    if type(str1) is str:
+        str1 = str1.encode('utf-8')
+    if type(str2) is str:
+        str2 = str2.encode('utf-8')
+    
+    return bytes(b1 ^ b2 for b1, b2 in zip(str1, str2))
 
 # CBC encrypt with ECB
 def cbc_encrypt(plaintext, IV, key):
-    ciphertext = ""
-    for block in plaintext:
-        if block == 1:
+    ciphertext = b""
+    for char in range(0, len(plaintext), 16):
+        blocktext = plaintext[char:char+16]
+
+        # XOR with next plain-text block
+        if char == 0:
             xor_str = IV
         else:
             xor_str = next_block
+        xor_out = xor_strings(blocktext, xor_str)
 
-        # combine with next plain-text block
-        xor_out = xor_strings(block, xor_str)
+        # encrypt
+        ecb_out_bytes = ecb_encrypt(xor_out, key)
 
-        ciphertext.append(ecb_encrypt(xor_out))
+        # save the output and move forward
+        ciphertext = b''.join([ciphertext, ecb_out_bytes])
         next_block = ciphertext
     return ciphertext
 
 def cbc_decrypt(ciphertext, IV, key):
-    print("Start cbc_decrypt()")
+    plaintext = b""
+    for char in range(0, len(ciphertext), 16):
+        next_cipher_block = ciphertext[char:char+16]
 
-    print(ecb_decrypt(ciphertext, "YELLOW SUBMARINE"))
+        # decrypt
+        ecb_out_bytes = ecb_decrypt(next_cipher_block, key)
+
+        # XOR with decrypted output text
+        if char == 0:
+            xor_str = IV
+        else:
+            xor_str = last_cipher_block
+        xor_out = xor_strings(ecb_out_bytes, xor_str)
+
+        # save the output and move forward
+        plaintext = b''.join([plaintext, xor_out])
+        last_cipher_block = next_cipher_block
+    return plaintext
 
 def s2_ch10():
     print(f"s2_ch10")
@@ -250,16 +279,26 @@ def s2_ch10():
     # and using your XOR function from the previous exercise to combine them.
 
     # encrypt a test string
-    testplain = "hello"
+    testplain = b"helloiamaperson1"
     ciphertext = cbc_encrypt(testplain, IV, key)
 
     # decrypt the test string
-    cbc_decrypt(ciphertext, IV, key)
+    plaintext_check = cbc_decrypt(ciphertext, IV, key)
+    
+    if plaintext_check == testplain:
+        print("SUCCESS. They are the same.")
+    else:
+        print("FAIL")
 
     # Test decryption with my decryption function to make sure it works properly.
     with open("ch10_text.txt", "r") as file:
         ciphertext = file.read() # FIXME: should it be realines()?
-        cbc_decrypt(ciphertext)
+        cipherbytes = bytes(ciphertext, 'utf-8')
+        plaintext = cbc_decrypt(cipherbytes, IV, key)
+
+        print(plaintext.decode("utf-8", errors="ignore"))
+
+        # print(f"Plaintext: {plaintext}")
 
 # --------- s1_ch11 ---------
 def s2_c11():
