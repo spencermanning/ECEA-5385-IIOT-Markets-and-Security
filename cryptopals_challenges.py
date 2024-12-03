@@ -160,6 +160,12 @@ def s1_ch6():
     print("Done")
 
 # --------- s1_ch7 ---------
+def ecb_decrypt(ciphertext, key):
+    # Make the AES cipher from the given key
+    cipher = AES.new(key, AES.MODE_ECB)
+    plaintext = cipher.decrypt(ciphertext)
+    return plaintext
+
 def s1_ch7():
     print(f"s1_ch7")
     key = b"YELLOW SUBMARINE"
@@ -167,10 +173,7 @@ def s1_ch7():
         b64_coded_data = orig_file.read()
         ciphertext = base64.b64decode(b64_coded_data)
 
-        # Make the AES cipher from the given key
-        cipher = AES.new(key, AES.MODE_ECB)
-        
-        plaintext = cipher.decrypt(ciphertext)
+        plaintext = ecb_decrypt(ciphertext, key)
 
         print(plaintext.decode("utf-8", errors="ignore"))
 
@@ -206,11 +209,58 @@ def s2_ch9(byte_text):
     print(pad_msg(byte_text))
 
 # --------- s1_ch10 ---------
+def ecb_encrypt(plaintext, key):
+    # Make the AES cipher from the given key
+    cipher = AES.new(key, AES.MODE_ECB)
+    ciphertext = cipher.encrypt(plaintext)
+    return ciphertext
+
+def xor_strings(str1, str2):
+    return bytes(b1 ^ b2 for b1, b2 in zip(bytes.fromhex(str1), bytes.fromhex(str2)))
+
+# CBC encrypt with ECB
+def cbc_encrypt(plaintext, IV, key):
+    ciphertext = ""
+    for block in plaintext:
+        if block == 1:
+            xor_str = IV
+        else:
+            xor_str = next_block
+
+        # combine with next plain-text block
+        xor_out = xor_strings(block, xor_str)
+
+        ciphertext.append(ecb_encrypt(xor_out))
+        next_block = ciphertext
+    return ciphertext
+
+def cbc_decrypt(ciphertext, IV, key):
+    print("Start cbc_decrypt()")
+
+    print(ecb_decrypt(ciphertext, "YELLOW SUBMARINE"))
+
 def s2_ch10():
     print(f"s2_ch10")
-    IV = "ABCDEFGHIJKLMNOP"
+    IV = "\x00" * 16 # FIXME: is 16 bytes correct?
+    key = b"YELLOW SUBMARINE"
 
-    
+    # TODO: Implement CBC mode by hand by taking the ECB function you wrote earlier, 
+    # making it encrypt instead of decrypt 
+    # (verify this by decrypting whatever you encrypt to test), 
+    # and using your XOR function from the previous exercise to combine them.
+
+    # encrypt a test string
+    testplain = "hello"
+    ciphertext = cbc_encrypt(testplain, IV, key)
+
+    # decrypt the test string
+    cbc_decrypt(ciphertext, IV, key)
+
+    # Test decryption with my decryption function to make sure it works properly.
+    with open("ch10_text.txt", "r") as file:
+        ciphertext = file.read() # FIXME: should it be realines()?
+        cbc_decrypt(ciphertext)
+
 # --------- s1_ch11 ---------
 def s2_c11():
     print(f"s2_ch11")
