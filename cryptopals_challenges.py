@@ -4,6 +4,8 @@ import base64
 from itertools import cycle # for challenge 5
 from Crypto.Cipher import AES # for challenge 7
 from Crypto.Util.Padding import pad, unpad  # for challenge 9
+from Crypto.Random import get_random_bytes  # for challenge 11
+import random # for challenge 11
 
 # --------- s1_ch1 ---------
 def hexTobase64(hex):
@@ -301,8 +303,42 @@ def s2_ch10():
         # print(f"Plaintext: {plaintext}")
 
 # --------- s1_ch11 ---------
-def s2_c11():
+def encryption_oracle(input):
+    # "Write a function to generate a random AES key; that's just 16 random bytes."
+    key = get_random_bytes(16)
+
+    # "Under the hood, have the function append 5-10 bytes (count chosen randomly)
+    # before the plaintext and 5-10 bytes after the plaintext."
+    cnt = random.randint(5, 10)
+    testbyte = b'6'
+    final = b''.join([testbyte*cnt, input, testbyte*cnt])
+
+    # "Now, have the function choose to encrypt under ECB 1/2 the time, 
+    # and under CBC the other half (just use random IVs each time for CBC). 
+    # Use rand(2) to decide which to use."
+    if random.randint(0, 1):
+        ciphertext = ecb_encrypt(final, key)
+    else:
+        ciphertext = cbc_encrypt(final, random.randbytes(16), key)
+    return ciphertext
+
+def detect_mode(ciphertext):
+    blocks = [ciphertext[i:i+16] for i in range(0, len(ciphertext), 16)]
+
+    if len(blocks) != len(set(blocks)):
+        return "ECB"
+    else:
+        return "CBC"
+    
+def s2_ch11():
     print(f"s2_ch11")
+
+    ciphertext = encryption_oracle(b"hi")
+
+    # "Detect the block cipher mode the function is using each time. 
+    # You should end up with a piece of code that, 
+    # pointed at a black box that might be encrypting ECB or CBC, tells you which one is happening."
+    detect_mode(ciphertext)
 
 # --------- s1_ch12 ---------
 def s2_ch12():
@@ -339,8 +375,8 @@ if __name__ == "__main__":
     # s1_ch7()
     # s1_ch8()
     # s2_ch9(b"YELLOW SUBMARINE")
-    s2_ch10()
-    # s2_ch11()
+    # s2_ch10()
+    s2_ch11()
     # s2_ch12()
     # s2_ch13()
     # s2_ch14()
