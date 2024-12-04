@@ -360,8 +360,43 @@ def s2_ch12(input, global_key):
     encryption_oracle2(input, global_key)
 
 # --------- s1_ch13 ---------
+def profile_for(email):
+    email = email.replace("&", "").replace("=", "")
+    return f"email={email}&uid=10&role=user"
+
+def encrypt_profile(profile, key):
+    cipher = AES.new(key, AES.MODE_ECB)
+    padded_profile = profile + b'\x00' * (16 - len(profile) % 16)
+    return cipher.encrypt(padded_profile)
+
+def decrypt_profile(ciphertext, key):
+    cipher = AES.new(key, AES.MODE_ECB)
+    decrypted = cipher.decrypt(ciphertext)
+    return decrypted.rstrip(b'\x00').decode()
+
+def parse_profile(profile):
+    fields = profile.split("&")
+    return {k: v for k, v in (field.split("=") for field in fields)}
+
+
 def s2_ch13():
     print(f"s2_ch13")
+
+    key = get_random_bytes(16)
+    block_size = 16
+
+    email1 = "A" * (block_size - len("email="))
+    ciphertext1 = encrypt_profile(profile_for(email1))
+
+    email2 = "A" * (block_size - len("email=")) + "admin"
+    ciphertext2 = encrypt_profile(profile_for(email2))
+
+    admin_block = ciphertext2[block_size:block_size * 2]
+
+    crafted_ciphertext = ciphertext1[:block_size *2] + admin_block
+
+    crafted_profile = decrypt_profile(crafted_ciphertext)
+    print(parse_profile(crafted_profile))
 
 # --------- s1_ch14 ---------
 def s2_ch14():
@@ -392,8 +427,8 @@ if __name__ == "__main__":
     # s2_ch9(b"YELLOW SUBMARINE")
     # s2_ch10()
     # s2_ch11()
-    s2_ch12()
-    # s2_ch13()
+    # s2_ch12()
+    s2_ch13()
     # s2_ch14()
     # s2_ch15()
     # s2_ch16()
