@@ -341,8 +341,23 @@ def s2_ch11():
     detect_mode(ciphertext)
 
 # --------- s1_ch12 ---------
-def s2_ch12():
+def encryption_oracle2(input, key):
+    # cnt = random.randint(5, 10)
+    # testbyte = b'6'
+    # final = b''.join([testbyte*cnt, input, testbyte*cnt])
+    given_string = b'Um9sbGluJyBpbiBteSA1LjAKV2l0aCBteSByYWctdG9wIGRvd24gc28gbXkgaGFpciBjYW4gYmxvdwpUaGUgZ2lybGllcyBvbiBzdGFuZGJ5IHdhdmluZyBqdXN0IHRvIHNheSBoaQpEaWQgeW91IHN0b3A/IE5vLCBJIGp1c3QgZHJvdmUgYnkK'
+    given_string_b64_decoded = base64.b64decode(given_string)
+    final = b''.join([input, given_string])
+
+    ciphertext = ecb_encrypt(final, key)
+    return ciphertext
+
+def s2_ch12(input, global_key):
     print(f"s2_ch12")
+
+    global_key = get_random_bytes(16)
+
+    encryption_oracle2(input, global_key)
 
 # --------- s1_ch13 ---------
 def s2_ch13():
@@ -376,8 +391,8 @@ if __name__ == "__main__":
     # s1_ch8()
     # s2_ch9(b"YELLOW SUBMARINE")
     # s2_ch10()
-    s2_ch11()
-    # s2_ch12()
+    # s2_ch11()
+    s2_ch12()
     # s2_ch13()
     # s2_ch14()
     # s2_ch15()
