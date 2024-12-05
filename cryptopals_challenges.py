@@ -6,6 +6,7 @@ from Crypto.Cipher import AES # for challenge 7
 from Crypto.Util.Padding import pad, unpad  # for challenge 9
 from Crypto.Random import get_random_bytes  # for challenge 11
 import random # for challenge 11
+import os # for challenge 14
 
 # --------- s1_ch1 ---------
 def hexTobase64(hex):
@@ -399,8 +400,21 @@ def s2_ch13():
     print(parse_profile(crafted_profile))
 
 # --------- s1_ch14 ---------
-def s2_ch14():
+def encryption_oracle3(input, key):
+    cnt = random.randint(0, 100)
+    rand_str = os.urandom(cnt)
+    final = b''.join([input, rand_str])
+
+    ciphertext = ecb_encrypt(final, key)
+    return ciphertext
+
+def s2_ch14(input, global_key):
     print(f"s2_ch14")
+
+    global_key = get_random_bytes(16)
+
+    encryption_oracle3(input, global_key)
+
 
 # --------- s1_ch15 ---------
 def s2_ch15():
