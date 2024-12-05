@@ -430,8 +430,40 @@ def s2_ch15(input: bytes, block_size: int = 16):
     return input[:-pad_len]
 
 # --------- s1_ch16 ---------
+def is_admin(ciphertext, IV, key):
+    plaintext = cbc_decrypt(ciphertext, IV, key)
+    return b";admin=true;" in plaintext
+
+def cbc_bitflipping_attack(key, IV):
+    input = b"A" * 16
+    
+    # Encrypt the userdata
+    prefix = b"comment1=cooking%20MCs;userdata="
+    suffix = b";comment2=%20like%20a%20pound%20of%20bacon"
+    sanitized = input.replace(b";", b"%3B").replace(b"=", b"%3D")
+    plaintext = prefix + sanitized + suffix
+    ciphertext = cbc_encrypt(plaintext, key, IV)
+
+    target_block = 2
+    offset = (target_block - 1) * 16
+
+    ciphertext = bytearray(ciphertext)
+    desired = b";admin=true;"
+    current = b"A" * len(desired)
+
+    for i in range(len(desired)):
+        ciphertext[offset + i] ^= current[i] ^ desired[i]
+
+    if is_admin(bytes(ciphertext)):
+        print("Found")
+    else:
+        print("Failed to inject")
+        
 def s2_ch16():
     print(f"s2_ch16")
+    key = os.urandom(16)
+    IV = os.urandom(16)
+    cbc_bitflipping_attack(key, IV)
 
 
 if __name__ == "__main__":
@@ -453,8 +485,8 @@ if __name__ == "__main__":
     # s2_ch12()
     # s2_ch13()
     # s2_ch14()
-    s2_ch15()
-    # s2_ch16()
+    # s2_ch15()
+    s2_ch16()
 
     print("\n------------------ End: ------------------")
 
