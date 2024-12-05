@@ -417,8 +417,17 @@ def s2_ch14(input, global_key):
 
 
 # --------- s1_ch15 ---------
-def s2_ch15():
+def s2_ch15(input: bytes, block_size: int = 16):
     print(f"s2_ch15")
+
+    pad_len = input[-1]
+    if pad_len < 1 or pad_len > block_size:
+        raise ValueError("Invalid padding length")
+    
+    if input[-pad_len:] != bytes([pad_len] * pad_len):
+        raise ValueError("Invalid PKCS#7 padding")
+    
+    return input[:-pad_len]
 
 # --------- s1_ch16 ---------
 def s2_ch16():
@@ -442,9 +451,9 @@ if __name__ == "__main__":
     # s2_ch10()
     # s2_ch11()
     # s2_ch12()
-    s2_ch13()
+    # s2_ch13()
     # s2_ch14()
-    # s2_ch15()
+    s2_ch15()
     # s2_ch16()
 
     print("\n------------------ End: ------------------")
